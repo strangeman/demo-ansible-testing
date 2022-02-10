@@ -1,0 +1,14 @@
+---
+- name: Ensure than node_exporter returns metrics on 9100 port
+  ansible.builtin.wait_for:
+    port: 9100
+
+- name: Get metrics
+  ansible.builtin.uri: url=http://localhost:9100/metrics return_content=yes
+  register: webpage
+
+- name: Assert than needed collectors enabled
+  ansible.builtin.assert:
+    that:
+      - "'node_network_receive_packets_total' in webpage.content"
+      - "'node_hwmon_sensor_label' in webpage.content"

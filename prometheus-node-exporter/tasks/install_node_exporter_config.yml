@@ -1,0 +1,35 @@
+---
+- name: Detect Node Exporters
+  stat: path=/usr/bin/node_exporter
+  register: node_exporter_detected
+  tags: config
+
+- name: Install node_exporter.service unified config
+  template:
+    src=node_exporter.yml.j2
+    dest=/etc/default/node_exporter
+    mode=0644
+  when: node_exporter_detected.stat.exists
+  register: result
+  notify: restart node_exporter
+  tags: config
+
+- name: Create directory for textfile collector
+  file: 
+    path: /opt/textfile_collector
+    state: directory
+
+- name: Copy textcollector scripts
+  copy:
+    src: "{{ item }}"
+    dest: /opt/textfile_collector/{{ item }}
+    mode: '0755'
+  with_items:
+    - "{{ node_exporter_textcollector_scripts }}"
+
+# - name: Create cronjobs for textcollector scripts
+#   cron:
+#     name: "textfile collector {{ item }}"
+#     job: 'bash -c "/opt/textfile_collector/{{ item }} | sponge /opt/textfile_collector/{{ item }}.prom"'
+#   with_items:
+#     - "{{ node_exporter_textcollector_scripts }}"

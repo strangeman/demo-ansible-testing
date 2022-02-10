@@ -1,0 +1,46 @@
+---
+- name: Add prometheus repository
+  yum_repository:
+    name: prometheus
+    description: prometheus YUM repo
+    baseurl: 'https://packagecloud.io/prometheus-rpm/release/el/{% if ansible_distribution_major_version=="8" %}8{% else %}7{% endif %}/$basearch'
+    gpgcheck: no
+    repo_gpgcheck: yes
+    gpgkey: https://packagecloud.io/prometheus-rpm/release/gpgkey
+
+
+- name: Install node_exporter
+  yum:
+    name="node_exporter-{{ node_exporter_version }}"
+    update_cache=true
+    disable_gpg_check=true
+    state=present
+  register: result
+  tags: packages
+
+- name: Start node_exporter
+  systemd:
+    name: node_exporter
+    enabled: yes
+    state: started
+  when: result !=0
+  tags: service
+
+- name: Install packages for exporter (moreutils, smartmontools)
+  yum:
+    name:
+      - moreutils
+      - smartmontools
+    state: present
+  when: ansible_distribution_major_version=="7"
+  tags: packages
+
+- name: Install packages for exporter (moreutils, smartmontools)
+  yum:
+    name:
+      - moreutils
+      - smartmontools
+    state: present
+    enablerepo: powertools
+  when: ansible_distribution_major_version=="8"
+  tags: packages

@@ -1,0 +1,9 @@
+---
+# tasks file for prometheus-exporters
+- import_tasks: install_exporters.yml
+
+- import_tasks: install_node_exporter_config.yml
+
+- meta: flush_handlers
+
+- import_tasks: verify.yml

@@ -1,0 +1,8 @@
+---
+# defaults file for prometheus-exporters
+node_exporter_listen_port: "9100"
+node_exporter_version: '0.18.1-1.{% if ansible_distribution_major_version=="8" %}el8{% else %}el7.centos{% endif %}'
+
+node_exporter_textcollector_scripts:
+  - textcollector_smart.sh
+  - need_server_restart.sh
